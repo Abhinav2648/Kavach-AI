@@ -1,3 +1,4 @@
+import About from "./components/About";
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Features from './components/Features';
@@ -15,6 +16,7 @@ function App() {
           <Hero />
           <Features />
           <Stats />
+          <About/>
         </main>
         <Footer />
       </div>
