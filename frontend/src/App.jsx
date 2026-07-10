@@ -1,26 +1,38 @@
+import { Routes, Route } from "react-router-dom";
+
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import Features from "./components/Features";
+import Stats from "./components/Stats";
 import About from "./components/About";
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Features from './components/Features';
-import Stats from './components/Stats';
-import Footer from './components/Footer';
+import Footer from "./components/Footer";
+
+import Scan from "./pages/Scan";
+
+function HomePage() {
+  return (
+    <div className="min-h-screen bg-slate-950 text-white">
+      <Navbar />
+
+      <Hero />
+
+      <Features />
+
+      <Stats />
+
+      <About />
+
+      <Footer />
+    </div>
+  );
+}
 
 function App() {
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-cyan-500/30">
-      <div className="fixed inset-0 z-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(17,24,39,1)_0%,_rgba(2,6,23,1)_100%)]"></div>
-
-      <div className="relative z-10">
-        <Navbar />
-        <main>
-          <Hero />
-          <Features />
-          <Stats />
-          <About/>
-        </main>
-        <Footer />
-      </div>
-    </div>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/scan" element={<Scan />} />
+    </Routes>
   );
 }
 

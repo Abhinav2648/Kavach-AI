@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   ShieldCheck,
   ShieldAlert,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 
 const Hero = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative min-h-screen bg-slate-950 flex items-center overflow-hidden pt-44 pb-20 px-6">
 
@@ -59,12 +61,12 @@ const Hero = () => {
 
           <div className="mt-10 flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
 
-            <button className="flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-8 py-4 rounded-xl transition hover:scale-105 shadow-[0_0_30px_rgba(6,182,212,0.45)]">
-
-              <ShieldCheck size={20} />
-
-              Start AI Scan
-
+            <button
+                   onClick={() => navigate("/scan")}
+                   className="flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-8 py-4 rounded-xl transition-all"
+              >
+                   <ShieldCheck size={20} />
+                     Start AI Scan
             </button>
 
             <button className="flex items-center justify-center gap-2 border border-red-500/40 hover:bg-red-500/10 px-8 py-4 rounded-xl text-white font-bold transition">
