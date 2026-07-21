@@ -157,9 +157,12 @@ const Scan = () => {
           return;
         }
 
-        const response = await axios.post("http://127.0.0.1:5000/predict", {
-          text: text,
-        });
+        const response = await axios.post(
+          "https://kavach-ai-rfhe.onrender.com/predict",
+          {
+            text: text,
+          },
+        );
 
         setResult(response.data);
         await saveScanToFirestore("sms", text, response.data);
@@ -185,9 +188,12 @@ const Scan = () => {
           return;
         }
 
-        const response = await axios.post("http://127.0.0.1:5000/predict_url", {
-          url: url,
-        });
+        const response = await axios.post(
+          "https://kavach-ai-rfhe.onrender.com/predict_url",
+          {
+            url: url,
+          },
+        );
 
         setResult(response.data);
         await saveScanToFirestore("url", url, response.data);
@@ -218,7 +224,7 @@ const Scan = () => {
         formData.append("file", image);
 
         const response = await axios.post(
-          "http://127.0.0.1:5000/predict_image",
+          "https://kavach-ai-rfhe.onrender.com/predict_image",
           formData,
           {
             headers: {
