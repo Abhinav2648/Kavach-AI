@@ -12,7 +12,7 @@ import {
 const Hero = () => {
   const navigate = useNavigate();
   return (
-    <section className="relative min-h-screen bg-slate-950 flex items-center overflow-hidden pt-44 pb-20 px-6">
+    <section id="home" className="relative min-h-screen bg-slate-950 flex items-center overflow-hidden pt-44 pb-20 px-6">
       {/* Background Glow */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px]" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px]" />
