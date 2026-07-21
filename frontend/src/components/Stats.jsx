@@ -1,65 +1,90 @@
+import { useEffect, useState } from "react";
 import {
   ShieldAlert,
   Activity,
   Globe,
   PhoneOff,
   UserCheck,
-  Timer,
   TrendingUp,
 } from "lucide-react";
 
-const statsData = [
+const Stats = () => {
+  const [stats, setStats] = useState({
+    totalScans: 0,
+    threatsDetected: 0,
+    safeScans: 0,
+    smsScanned: 0,
+    urlsScanned: 0,
+    imagesScanned: 0,
+  });
+
+  useEffect(() => { 
+    const loadStats = () => {
+      const savedStats = JSON.parse(localStorage.getItem("scanStats"));
+
+      if (savedStats) {
+        setStats(savedStats);
+      }
+    };
+
+    loadStats();
+
+    window.addEventListener("storage", loadStats);
+
+    return () => {
+      window.removeEventListener("storage", loadStats);
+    };
+  }, []);
+  const statsData = [
   {
-    id: "0x2A4",
-    label: "Threats Blocked Today",
-    value: "12,458",
-    icon: ShieldAlert,
+    id: "SCAN-01",
+    label: "Total Scans",
+    value: stats.totalScans,
+    icon: Activity,
     color: "text-cyan-400",
     isLive: true,
   },
   {
-    id: "0x4F1",
-    label: "AI Detection Accuracy",
-    value: "99.4%",
-    icon: Activity,
-    color: "text-emerald-400",
-    isLive: false,
-  },
-  {
-    id: "0x7B9",
-    label: "Phishing URLs Detected",
-    value: "2,318",
-    icon: Globe,
-    color: "text-blue-400",
-    isLive: true,
-  },
-  {
-    id: "0x9D3",
-    label: "Scam Calls Reported",
-    value: "876",
-    icon: PhoneOff,
+    id: "SCAN-02",
+    label: "Threats Detected",
+    value: stats.threatsDetected,
+    icon: ShieldAlert,
     color: "text-rose-400",
     isLive: true,
   },
   {
-    id: "0xAE7",
-    label: "Digital Arrest Cases Prevented",
-    value: "547",
+    id: "SCAN-03",
+    label: "Safe Scans",
+    value: stats.safeScans,
     icon: UserCheck,
-    color: "text-indigo-400",
+    color: "text-emerald-400",
     isLive: true,
   },
   {
-    id: "0xF20",
-    label: "Average Scan Time",
-    value: "0.8 sec",
-    icon: Timer,
+    id: "SCAN-04",
+    label: "SMS Scanned",
+    value: stats.smsScanned,
+    icon: PhoneOff,
+    color: "text-blue-400",
+    isLive: false,
+  },
+  {
+    id: "SCAN-05",
+    label: "URLs Scanned",
+    value: stats.urlsScanned,
+    icon: Globe,
+    color: "text-indigo-400",
+    isLive: false,
+  },
+  {
+    id: "SCAN-06",
+    label: "Images Scanned",
+    value: stats.imagesScanned,
+    icon: Activity,
     color: "text-amber-400",
     isLive: false,
   },
 ];
-
-const Stats = () => {
   return (
     <section
       id="stats"
@@ -69,11 +94,9 @@ const Stats = () => {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-
         {/* Header */}
 
         <div className="text-center mb-20">
-
           <p className="text-cyan-400 uppercase tracking-[0.3em] font-semibold text-sm">
             Live Metrics
           </p>
@@ -89,26 +112,20 @@ const Stats = () => {
             Real-time AI powered cyber threat intelligence protecting citizens
             across India every second.
           </p>
-
         </div>
 
         {/* Dashboard Cards */}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
           {statsData.map((stat, index) => (
-
             <div
               key={index}
               className="group relative overflow-hidden p-8 rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-slate-800 transition-all duration-500 hover:-translate-y-2 hover:border-cyan-500/40 hover:shadow-[0_0_35px_rgba(6,182,212,0.15)]"
             >
-
               <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               <div className="relative z-10">
-
                 <div className="flex justify-between items-start mb-6">
-
                   <div
                     className={`p-3 rounded-2xl bg-slate-950 border border-slate-800 ${stat.color} group-hover:scale-110 transition-transform duration-500`}
                   >
@@ -126,7 +143,6 @@ const Stats = () => {
                       </span>
                     </div>
                   )}
-
                 </div>
 
                 <h3 className="text-4xl font-black text-white tracking-tight group-hover:text-cyan-400 transition-colors duration-300">
@@ -138,64 +154,42 @@ const Stats = () => {
                 </p>
 
                 <div className="mt-8 pt-6 border-t border-slate-800 flex items-center justify-between">
-
                   <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
-
                     <TrendingUp size={14} />
 
-                    <span>+12% this hour</span>
-
+                    <span>Updated from scan activity</span>
                   </div>
 
                   <div className="text-slate-600 text-[10px] font-mono">
-
                     ID: {stat.id}
-
                   </div>
-
                 </div>
-
               </div>
-
             </div>
-
           ))}
-
         </div>
 
         {/* Bottom Status */}
 
         <div className="mt-14 rounded-2xl border border-cyan-500/10 bg-gradient-to-r from-cyan-900/10 via-slate-900/30 to-transparent p-6 flex flex-col md:flex-row justify-between items-center gap-5">
-
           <div className="flex items-center gap-4">
-
             <div className="w-11 h-11 rounded-full bg-cyan-500/20 flex items-center justify-center">
-
               <Activity size={20} className="text-cyan-400" />
-
             </div>
 
             <p className="text-slate-300">
-
               <span className="text-cyan-400 font-semibold">
                 AI Security Network Operational
               </span>{" "}
               • Monitoring cyber threats across India in real time.
-
             </p>
-
           </div>
 
           <button className="text-cyan-400 text-sm font-semibold hover:text-cyan-300 transition-colors">
-
             View Live Threat Map →
-
           </button>
-
         </div>
-
       </div>
-
     </section>
   );
 };
