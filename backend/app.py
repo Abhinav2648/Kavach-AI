@@ -624,6 +624,8 @@ def predict_image():
     except Exception as e:
         print("Image Prediction Error:", e)
         return jsonify({"error": str(e)}), 500
-
+@app.route("/healthz", methods=["GET"])
+def healthz():
+    return {"status": "ok"}, 200
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
