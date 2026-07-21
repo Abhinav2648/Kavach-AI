@@ -1,7 +1,7 @@
 Flask
 flask-cors
 python-dotenv
-google-generativeai
+google-genai
 Pillow
 pytesseract
 gunicorn
