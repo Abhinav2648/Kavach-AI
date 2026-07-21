@@ -302,7 +302,15 @@ const Scan = () => {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setResult({
+                    status: "Waiting for Scan",
+                    confidence: "--",
+                    verdict: "Ready to analyze potential threats.",
+                    reason: "Upload data and click Scan.",
+                  });
+                }}
                 className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 ${
                   activeTab === tab.id
                     ? "bg-cyan-500 text-slate-950 shadow-lg"
