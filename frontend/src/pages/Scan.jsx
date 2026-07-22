@@ -158,7 +158,7 @@ const Scan = () => {
         }
 
         const response = await axios.post(
-          "https://kavach-ai-rfhe.onrender.com/predict",
+          "https://kavach-ai-1-z0bp.onrender.com/predict",
           {
             text: text,
           },
@@ -189,7 +189,7 @@ const Scan = () => {
         }
 
         const response = await axios.post(
-          "https://kavach-ai-rfhe.onrender.com/predict_url",
+          "https://kavach-ai-1-z0bp.onrender.com/predict_url",
           {
             url: url,
           },
@@ -224,7 +224,7 @@ const Scan = () => {
         formData.append("file", image);
 
         const response = await axios.post(
-          "https://kavach-ai-rfhe.onrender.com/predict_image",
+          "https://kavach-ai-1-z0bp.onrender.com/predict_image",
           formData,
           {
             headers: {
