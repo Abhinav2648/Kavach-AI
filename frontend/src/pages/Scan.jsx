@@ -466,9 +466,9 @@ const Scan = () => {
               <div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden">
                 <div
                   className={`h-full ${
-                    result.status.toLowerCase().includes("safe")
+                    riskLevel === "Low"
                       ? "bg-green-500"
-                      : result.status.toLowerCase().includes("suspicious")
+                      : riskLevel === "Medium"
                         ? "bg-yellow-400"
                         : "bg-red-500"
                   }`}
