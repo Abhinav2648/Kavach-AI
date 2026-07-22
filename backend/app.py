@@ -261,7 +261,7 @@ def analyze_with_gemini(input_text):
 
     try:
         response = client.models.generate_content(
-         model="gemini-3-flash-preview",
+         model="gemini-3.5-flash-preview",
              contents=prompt,
              config={
          "http_options": {
