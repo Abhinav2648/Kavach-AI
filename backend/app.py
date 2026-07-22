@@ -537,9 +537,23 @@ def predict_image():
         # -----------------------------------
         # Layer 1: OCR Processing
         # -----------------------------------
-        extracted_text = pytesseract.image_to_string(
-            Image.open(filepath)
-        )
+        # Low-memory OCR for Render Free (512 MB)
+        with Image.open(filepath) as img:
+            img = img.convert("L")
+
+            # Reduce large screenshots before sending the  m to Tesseract
+            max_width = 1200
+
+            if img.width > max_width:
+                ratio = max_width / img.width
+                new_height = int(img.height * ratio)
+                img = img.resize((max_width, new_height))
+
+            extracted_text = pytesseract.image_to_string(
+                img,
+                config="--psm 6",
+                timeout=20
+            )
 
         # Remove temporary uploaded image
         os.remove(filepath)
