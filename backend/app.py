@@ -261,9 +261,14 @@ def analyze_with_gemini(input_text):
 
     try:
         response = client.models.generate_content(
-            model="gemini-3-flash-preview",
-            contents=prompt
-        )
+         model="gemini-3-flash-preview",
+             contents=prompt,
+             config={
+         "http_options": {
+            "timeout": 8000
+        }
+    }
+)
 
         cleaned_response = (
             response.text
@@ -276,7 +281,7 @@ def analyze_with_gemini(input_text):
 
     except Exception as e:
         print(f"Gemini Error: {e}")
-        return None
+        return get_fallback_analysis(input_text)
 
 def get_fallback_analysis(text):
     """Local logic if Gemini is unavailable."""
