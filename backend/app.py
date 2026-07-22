@@ -634,17 +634,17 @@ def predict_image():
         gemini_result["extracted_text"] = extracted_text
 
         return jsonify(gemini_result), 200
-
     except Exception as e:
-     import traceback
+        import traceback
 
-    error_details = traceback.format_exc()
-    print(error_details, flush=True)
+        error_details = traceback.format_exc()
+        print(error_details, flush=True)
 
-    return jsonify({
-        "error": str(e),
-        "details": error_details
-    }), 500
+        return jsonify({
+            "error": str(e),
+            "details": error_details
+        }), 500
+    
 @app.route("/healthz", methods=["GET"])
 def healthz():
     return {"status": "ok"}, 200
