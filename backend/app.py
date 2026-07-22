@@ -7,15 +7,8 @@ from google import genai
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-import pytesseract
 from PIL import Image
-
-import shutil
-
-tesseract_path = shutil.which("tesseract")
-
-if tesseract_path:
-    pytesseract.pytesseract.tesseract_cmd = tesseract_path
+from io import BytesIO
 
 # 1. Load Environment Variables
 load_dotenv()
@@ -521,119 +514,113 @@ def predict_url():
         print("URL Prediction Error:", e)
         return jsonify({"error": str(e)}), 500
     
+
 @app.route("/predict_image", methods=["POST"])
 def predict_image():
     try:
         if "file" not in request.files:
             return jsonify({"error": "No file uploaded"}), 400
 
+        if not client:
+            return jsonify({"error": "Gemini API is not configured"}), 500
+
         file = request.files["file"]
 
-        filename = f"{uuid.uuid4()}.png"
-        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        # Read image directly into memory
+        image_bytes = file.read()
 
-        file.save(filepath)
+        if not image_bytes:
+            return jsonify({"error": "Empty image uploaded"}), 400
 
-        # -----------------------------------
-        # Layer 1: OCR Processing
-        # -----------------------------------
-        # Low-memory OCR for Render Free (512 MB)
-        with Image.open(filepath) as img:
-            img = img.convert("L")
+        # Validate and compress image to reduce memory/network usage
+        image = Image.open(BytesIO(image_bytes))
+        image = image.convert("RGB")
 
-            # Reduce large screenshots before sending the  m to Tesseract
-            max_width = 600
+        image.thumbnail((1000, 1000))
 
-            if img.width > max_width:
-                ratio = max_width / img.width
-                new_height = int(img.height * ratio)
-                img = img.resize((max_width, new_height))
+        output = BytesIO()
+        image.save(output, format="JPEG", quality=75, optimize=True)
+        compressed_bytes = output.getvalue()
 
-            extracted_text = pytesseract.image_to_string(
-                    img,
-                    config="--psm 6",
-                    timeout=30
+        # Send screenshot directly to Gemini
+        prompt = """
+        Read all visible text from this screenshot.
+
+        Then analyze it for scams, phishing, digital arrest fraud,
+        fake bank/KYC warnings, OTP scams, suspicious links,
+        payment fraud, threats, prizes, and impersonation.
+
+        Return ONLY valid JSON in this exact format:
+
+        {
+          "extracted_text": "all readable text from image",
+          "status": "Safe or Suspicious or Threat Detected",
+          "confidence": 0,
+          "verdict": "short explanation",
+          "risk_level": "Low or Medium or High",
+          "detected_keywords": [],
+          "safety_recommendation": "short safety recommendation"
+        }
+
+        confidence must be a number from 0 to 100.
+        """
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[
+                prompt,
+                genai.types.Part.from_bytes(
+                    data=compressed_bytes,
+                    mime_type="image/jpeg"
                 )
-
-        # Remove temporary uploaded image
-        os.remove(filepath)
-
-        if not extracted_text.strip():
-            return jsonify({
-                "error": "No readable text detected in the image"
-            }), 400
-
-        # -----------------------------------
-        # Layer 2: KAVACH Local Risk Engine
-        # -----------------------------------
-        local_analysis = calculate_local_risk(extracted_text)
-
-        local_score = local_analysis["local_risk_score"]
-
-        # -----------------------------------
-        # Layer 3: Gemini Semantic Analysis
-        # -----------------------------------
-        gemini_result = analyze_with_gemini(extracted_text)
-
-        # Gemini unavailable -> use local fallback
-        if not gemini_result:
-            gemini_result = get_fallback_analysis(extracted_text)
-
-        # -----------------------------------
-        # Layer 4: Hybrid Risk Fusion
-        # -----------------------------------
-        if local_score >= 60:
-            gemini_result["status"] = "Threat Detected"
-            gemini_result["risk_level"] = "High"
-
-        elif local_score >= 30:
-            if gemini_result.get("status") == "Safe":
-                gemini_result["status"] = "Suspicious"
-
-            if gemini_result.get("risk_level") == "Low":
-                gemini_result["risk_level"] = "Medium"
-
-        # -----------------------------------
-        # Combine detected keywords
-        # -----------------------------------
-        gemini_keywords = gemini_result.get(
-            "detected_keywords", []
+            ]
         )
 
-        combined_keywords = list(
+        raw_text = response.text.strip()
+
+        # Remove markdown fences if Gemini returns ```json
+        raw_text = raw_text.replace("```json", "").replace("```", "").strip()
+
+        result = json.loads(raw_text)
+
+        extracted_text = result.get("extracted_text", "")
+
+        # Run existing KAVACH local risk engine
+        local_analysis = calculate_local_risk(extracted_text)
+        local_score = local_analysis["local_risk_score"]
+
+        # Hybrid protection
+        if local_score >= 60:
+            result["status"] = "Threat Detected"
+            result["risk_level"] = "High"
+
+        elif local_score >= 30:
+            if result.get("status") == "Safe":
+                result["status"] = "Suspicious"
+
+            if result.get("risk_level") == "Low":
+                result["risk_level"] = "Medium"
+
+        # Combine Gemini + local keywords
+        gemini_keywords = result.get("detected_keywords", [])
+
+        result["detected_keywords"] = list(
             dict.fromkeys(
-                gemini_keywords
-                + local_analysis["found_keywords"]
+                gemini_keywords + local_analysis["found_keywords"]
             )
         )
 
-        gemini_result["detected_keywords"] = combined_keywords
+        result["local_risk_score"] = local_score
+        result["local_risk_level"] = local_analysis["local_risk_level"]
+        result["high_risk_phrases"] = local_analysis["high_risk_phrases"]
+        result["medium_risk_phrases"] = local_analysis["medium_risk_phrases"]
 
-        # -----------------------------------
-        # Add KAVACH engine information
-        # -----------------------------------
-        gemini_result["local_risk_score"] = local_score
-
-        gemini_result["local_risk_level"] = local_analysis[
-            "local_risk_level"
-        ]
-
-        gemini_result["high_risk_phrases"] = local_analysis[
-            "high_risk_phrases"
-        ]
-
-        gemini_result["medium_risk_phrases"] = local_analysis[
-            "medium_risk_phrases"
-        ]
-
-        gemini_result["analysis_engine"] = (
-            "KAVACH OCR + Hybrid Risk Engine + Gemini AI"
+        result["analysis_engine"] = (
+            "KAVACH Hybrid Risk Engine + Gemini Vision AI"
         )
 
-        # OCR text shown in frontend
-        gemini_result["extracted_text"] = extracted_text
+        return jsonify(result), 200
 
-        return jsonify(gemini_result), 200
     except Exception as e:
         import traceback
 
