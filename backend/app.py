@@ -552,7 +552,7 @@ def predict_image():
             extracted_text = pytesseract.image_to_string(
                     img,
                     config="--psm 6",
-                    timeout=15
+                    timeout=30
                 )
 
         # Remove temporary uploaded image
