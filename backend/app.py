@@ -542,7 +542,7 @@ def predict_image():
             img = img.convert("L")
 
             # Reduce large screenshots before sending the  m to Tesseract
-            max_width = 1200
+            max_width = 600
 
             if img.width > max_width:
                 ratio = max_width / img.width
@@ -552,7 +552,7 @@ def predict_image():
             extracted_text = pytesseract.image_to_string(
                     img,
                     config="--psm 6",
-                    timeout=60
+                    timeout=15
                 )
 
         # Remove temporary uploaded image
