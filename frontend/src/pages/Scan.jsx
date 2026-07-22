@@ -466,11 +466,11 @@ const Scan = () => {
               <div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden">
                 <div
                   className={`h-full ${
-                    parseInt(result.confidence) > 80
-                      ? "bg-red-500"
-                      : parseInt(result.confidence) > 50
+                    result.status.toLowerCase().includes("safe")
+                      ? "bg-green-500"
+                      : result.status.toLowerCase().includes("suspicious")
                         ? "bg-yellow-400"
-                        : "bg-green-500"
+                        : "bg-red-500"
                   }`}
                   style={{
                     width: result.confidence || "0%",
