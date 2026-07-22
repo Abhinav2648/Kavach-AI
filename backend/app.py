@@ -261,7 +261,7 @@ def analyze_with_gemini(input_text):
 
     try:
         response = client.models.generate_content(
-         model="gemini-3.6-flash",
+         mmodel="gemini-3.1-flash-lite",
              contents=prompt,
              config={
          "http_options": {
@@ -571,7 +571,7 @@ def predict_image():
         """
 
         response = client.models.generate_content(
-           model="gemini-3.6-flash",
+           model="gemini-3.1-flash-lite",
             contents=[
                 prompt,
                 genai.types.Part.from_bytes(
