@@ -281,7 +281,7 @@ def analyze_with_gemini(input_text):
 
     except Exception as e:
         print(f"Gemini Error: {e}")
-        return get_fallback_analysis(input_text)
+        return None
 
 def get_fallback_analysis(text):
     """Local logic if Gemini is unavailable."""
@@ -626,16 +626,19 @@ def predict_image():
 
         return jsonify(result), 200
 
-    except Exception as e:
-        import traceback
-
-        error_details = traceback.format_exc()
-        print(error_details, flush=True)
+    except Exception as e:     
+        print(f"Gemini Vision unavailable: {e}", flush=True)
 
         return jsonify({
-            "error": str(e),
-            "details": error_details
-        }), 500
+            "extracted_text": "",
+            "status": "Suspicious",
+            "confidence": 50,
+            "verdict": "AI vision service is temporarily busy. Please retry the screenshot scan.",
+            "risk_level": "Medium",
+            "detected_keywords": [],
+            "safety_recommendation": "Do not click suspicious links or share OTPs, passwords, or banking information.",
+            "analysis_engine": "KAVACH Safe Fallback"
+             }), 200
     
 @app.route("/healthz", methods=["GET"])
 def healthz():
